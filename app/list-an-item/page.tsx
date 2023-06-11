@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { FormEvent, useState } from "react";
 import UppNav from "@/components/UppNav";
 import whatNetwortk from "@/utils/whatNetwortk";
 import {
@@ -30,7 +30,7 @@ export default function ListAnItem({}: Props) {
     process.env.NEXT_PUBLIC_MALLARKET_CONTRACT,
     "marketplace"
   );
-  const [selectedNft, setSelectedNft] = useState<NFT>();
+  const [selectedItem, setSelectedItem] = useState<NFT>();
   const { contract: collectionContract } = useContract(
     process.env.NEXT_PUBLIC_COLLECTION_CONTRACT,
     "nft-collection"
@@ -53,13 +53,13 @@ export default function ListAnItem({}: Props) {
     error: errorDirect,
   } = useCreateAuctionListing(contract);
 
-  const handleCreateListing = async (e: FormEvent<HTMLFormElement>) => {
+  const makePlace = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (networkMismatch) {
       switchChain && switchChain(ChainId.Mumbai);
       return;
     }
-    if (!selectedNft) return;
+    if (!selectedItem) return;
 
     const target = e.target as typeof e.target & {
       elements: { listingType: { value: string }; price: { value: string } };
@@ -67,11 +67,11 @@ export default function ListAnItem({}: Props) {
 
     const { listingType, price } = target.elements;
 
-    if (listingType.value === "directListing") {
+    if (listingType.value === "direct") {
       createDirectListing(
         {
           assetContractAddress: process.env.NEXT_PUBLIC_COLLECTION_CONTRACT!,
-          tokenId: selectedNft.metadata.id,
+          tokenId: selectedItem.metadata.id,
           currencyContractAddress: NATIVE_TOKEN_ADDRESS,
           listingDurationInSeconds: 60 * 60 * 24 * 7,
           quantity: 1,
@@ -81,7 +81,7 @@ export default function ListAnItem({}: Props) {
         {
           onSuccess(data, variables, context) {
             console.log("SUCCESS: ", data, variables, context);
-            router.push("/");
+            router.push("/main-page");
           },
           onError(data, variables, context) {
             console.log("ERROR: ", data, variables, context);
@@ -90,12 +90,12 @@ export default function ListAnItem({}: Props) {
       );
     }
 
-    if (listingType.value === "auctionListing") {
+    if (listingType.value === "auction") {
       createAuctionListing(
         {
           assetContractAddress: process.env.NEXT_PUBLIC_COLLECTION_CONTRACT!,
           buyoutPricePerToken: price.value,
-          tokenId: selectedNft.metadata.id,
+          tokenId: selectedItem.metadata.id,
           currencyContractAddress: NATIVE_TOKEN_ADDRESS,
           startTimestamp: new Date(),
           listingDurationInSeconds: 60 * 60 * 24 * 7,
@@ -132,7 +132,7 @@ export default function ListAnItem({}: Props) {
               onClick={() => setSelectedItem(item)}
               className={`flex flex-col space-y-2 card min-w-fit 
               border-2 bg-gray-100 ${
-                item.metadata.id === selectedItem.metadata.id
+                item.metadata.id === selectedItem?.metadata.id
                   ? "border-black"
                   : "border-transparent"
               }`}
@@ -156,14 +156,14 @@ export default function ListAnItem({}: Props) {
                 <input
                   className="ml-auto h-10 w-10"
                   type="radio"
-                  name="type"
+                  name="listingType"
                   value="direct"
                 />
                 <label className="border-r font-light">Make An Auction</label>
                 <input
                   className="ml-auto h-10 w-10"
                   type="radio"
-                  name="type"
+                  name="listingType"
                   value="auction"
                 />
 
@@ -175,7 +175,10 @@ export default function ListAnItem({}: Props) {
                   placeholder="00.069"
                 />
               </div>
-              <button className="bg-cyan-700 text-white rounded-lf p-4 mt-8">
+              <button
+                type="submit"
+                className="bg-cyan-700 text-white rounded-lf p-4 mt-8"
+              >
                 Place An Item
               </button>
             </div>
