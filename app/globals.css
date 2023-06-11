@@ -3,16 +3,16 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
+  --foreground-rgb: 170, 170, 170;
+  --background-start-rgb: 255, 255, 255;
   --background-end-rgb: 255, 255, 255;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 255, 255, 255;
+    --background-end-rgb: 255, 255, 255;
   }
 }
 
@@ -21,7 +21,30 @@ body {
   background: linear-gradient(
       to bottom,
       transparent,
-      rgb(var(--background-end-rgb))
+      rgba(var(--background-end-rgb), 0.5)
     )
-    rgb(var(--background-start-rgb));
+    rgba(var(--background-start-rgb), 0.8);
+}
+
+@layer components {
+  .walletBu{
+    @apply bg-cyan-400 text-black font-bold py-2 px-4 rounded cursor-pointer;
+  }
+
+  .link {
+    @apply hover:text-cyan-700 hover:underline cursor-pointer text-gray-600
+  }
+
+  .linkMain {
+    @apply hover:text-green-700
+  }
+
+  .card {
+    @apply border border-gray-200 rounded-md p-5 bg-gray-50 cursor-pointer hover:bg-gray-100;
+  }
+
+  .formField {
+    @apply border-2 border-gray-300 bg-white h-10 
+    px-5 pr-16 rounded-lg text-sm outline-none;
+  }
 }
