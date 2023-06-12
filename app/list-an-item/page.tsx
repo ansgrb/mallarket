@@ -1,13 +1,13 @@
 "use client";
 import React, { FormEvent, useState } from "react";
 import UppNav from "@/components/UppNav";
-import whatNetwortk from "@/utils/whatNetwortk";
+// import whatNetwortk from "@/utils/whatNetwortk";
 import {
   useAddress,
   useContract,
   MediaRenderer,
   useSwitchChain,
-  useChain,
+  // useChain,
   useNetworkMismatch,
   useOwnedNFTs,
   useCreateAuctionListing,
@@ -15,7 +15,7 @@ import {
 } from "@thirdweb-dev/react";
 import {
   NFT,
-  NATIVE_TOKENS,
+  // NATIVE_TOKENS,
   NATIVE_TOKEN_ADDRESS,
   ChainId,
 } from "@thirdweb-dev/sdk";
