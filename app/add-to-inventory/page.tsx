@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { FormEvent, useState } from "react";
 import UppNav from "@/components/UppNav";
 import { useContract, useAddress } from "@thirdweb-dev/react";
 import Image from "next/image";
