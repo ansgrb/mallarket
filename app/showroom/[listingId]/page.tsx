@@ -16,7 +16,9 @@ import {
   useAddress,
   useAcceptDirectListingOffer,
   ChainId,
+  NATIVE_TOKENS,
 } from "@thirdweb-dev/react";
+import { ethers } from "ethers";
 import { useRouter } from "next/navigation";
 // import { Router } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -38,6 +40,14 @@ export default function ShowroomListings({
   const networkMismatch = useNetworkMismatch();
   // const [, switchNetwork] = useNetwork();
   const switchChain = useSwitchChain();
+
+  const { mutate: makeOffer } = useMakeOffer(contract);
+
+  const address = useAddress();
+
+  const { mutate: acceptOffer } = useAcceptDirectListingOffer(contract);
+
+  const { data: offers } = useOffers(contract, listingId);
 
   const router = useRouter();
 
@@ -133,6 +143,27 @@ export default function ShowroomListings({
         return;
       }
       if (listing?.type === ListingType.Direct) {
+        if (
+          listing.buyoutPrice.toString() ===
+          ethers.utils.parseEther(bidAmount).toString()
+        ) {
+          buyItem();
+          return;
+        }
+        console.log("Price was not met, make an offer...");
+        await makeOffer(
+          { quantity: 1, listingId, pricePerToken: bidAmount },
+          {
+            onSuccess(data, variables, context) {
+              alert("NICE, THAT WAS A SUCCESS OFFER YOU MADE!");
+              console.log("NICE, THAT WAS A SUCCESS", data, variables, context);
+            },
+            onError(data, variables, context) {
+              alert("SHAME, THAT WAS A MISS. OFFER COULD NOT BE MADE!");
+              console.log("ERROR", error, data, variables, context);
+            },
+          }
+        );
       }
       if (listing?.type === ListingType.Auction) {
       }
@@ -181,6 +212,74 @@ export default function ShowroomListings({
               Buy Now
             </button>
           </div>
+
+          {listing.type === ListingType.Direct && offers && (
+            <div className="grid grid-cols-2 gap-y-2">
+              <p className="font-bold">Offers:</p>
+              <p className="font-bold">
+                {offers.length > 0 ? offers.length : 0}
+              </p>
+              {offers.map((offer) => (
+                <>
+                  <p className="flex items-center ml-5 text-sm italic">
+                    <UserCircleIcon className="h-3 mr-2" />
+                    {offer.offeror.slice(0, 5) +
+                      "..." +
+                      offer.offeror.slice(-5)}
+                  </p>
+                  <div>
+                    <p
+                      className="text-sm italic"
+                      key={
+                        offer.listingId +
+                        offer.offeror +
+                        offer.totalOfferAmount.toString()
+                      }
+                    >
+                      {ethers.utils.formatEther(offer.totalOfferAmount)}{" "}
+                      {NATIVE_TOKENS[ChainId.Mumbai].symbol}
+                    </p>
+                    {listing.sellerAddress === address && (
+                      <button
+                        onClick={() => {
+                          acceptOffer(
+                            {
+                              listingId,
+                              addressOfOfferor: offer.offeror,
+                            },
+                            {
+                              onSuccess(data, variables, context) {
+                                alert("Offer accepted successfully!");
+                                console.log(
+                                  "SUCCESS: ",
+                                  data,
+                                  variables,
+                                  context
+                                );
+                                router.replace("/main-page");
+                              },
+                              onError(data, variables, context) {
+                                alert("ERROR: Offer could not be accept");
+                                console.log(
+                                  "ERROR: ",
+                                  data,
+                                  variables,
+                                  context
+                                );
+                              },
+                            }
+                          );
+                        }}
+                        className="p-2 w-32 bg-red-500/50 rounded-lg"
+                      >
+                        Accept Offer
+                      </button>
+                    )}
+                  </div>
+                </>
+              ))}
+            </div>
+          )}
 
           <div className="grid grid-cols-2 space-y-2 items-center justify-end">
             <hr className="col-span-2 " />
