@@ -10,7 +10,7 @@ type Props = {};
 export default function AddToInventory({}: Props) {
   const address = useAddress();
   const router = useRouter();
-  const [preview, setPreview] = useState();
+  const [preview, setPreview] = useState("");
   const [image, setImage] = useState();
   const { contract } = useContract(
     process.env.NEXT_PUBLIC_COLLECTION_CONTRACT,
